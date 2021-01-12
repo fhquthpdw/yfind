@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 	"runtime/pprof"
+	"runtime/trace"
 
 	"github.com/fhquthpdw/yfind/pkg/yfind"
 
@@ -126,14 +127,23 @@ var (
 
 //func Run(cmd *cobra.Command, args []string) {
 func Run(_ *cobra.Command, _ []string) {
+	// trace
+	// go tool trace --http=':8080' ./pprof/trace.out
+	fTrace, _ := os.Create("./pprof/trace.out")
+	trace.Start(fTrace)
+
 	// pprof
-	fCpu, _ := os.Create("./cpu.pprof")
-	fMem, _ := os.Create("./mem.pprof")
-	fGR, _ := os.Create("./goroutine.pprof")
+	// go tool trace --http=':8080' ./pprof/trace.out
+	fCpu, _ := os.Create("./pprof/cpu.pprof")
+	fMem, _ := os.Create("./pprof/mem.pprof")
+	fGR, _ := os.Create("./pprof/goroutine.pprof")
 	pprof.StartCPUProfile(fCpu)
 	pprof.WriteHeapProfile(fMem)
 	pprof.Lookup("goroutine").WriteTo(fGR, 1)
 	defer func() {
+		trace.Stop()
+		fTrace.Close()
+
 		pprof.StopCPUProfile()
 		fCpu.Close()
 		fMem.Close()

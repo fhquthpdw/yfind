@@ -15,3 +15,7 @@
 # vendor/
 
 pprof/
+.idea/
+
+main
+yfind
